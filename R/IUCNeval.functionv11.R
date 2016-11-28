@@ -609,8 +609,8 @@ subpop.comp <- function(XY, Resol_sub_pop) {
     
     if(Rank_CriteriaB==1) Cat <- "CR"
     if(Rank_CriteriaB==2) Cat <- "EN"
-    if(Rank_CriteriaB==3 && Nbe_Loc>6) Cat <- "VU"
-    if(Rank_CriteriaB==3 && Nbe_Loc==6) Cat <- "VU" ### If number of locations = 6, then VU+
+    if(Rank_CriteriaB==3 && Nbe_Loc>0 && Nbe_Loc<11) Cat <- "VU"
+    # if(Rank_CriteriaB==3 && Nbe_Loc==6) Cat <- "VU"
     
     if(Rank_CriteriaB>3 && Nbe_Loc<14) Cat <- "NT" ### If number of locations in [11-13], then NT otherwise LC
     if(Rank_CriteriaB>3 && Nbe_Loc>13) Cat <- "LC"
@@ -880,7 +880,9 @@ subpop.comp <- function(XY, Resol_sub_pop) {
   return(OUTPUT)
 }
 
-# Cell_size_AOO=2
+# DATA=MyData
+# 
+# Cell_size_AOO=20
 # Cell_size_locations=10
 # Resol_sub_pop=5
 # method_locations=c("fixed_grid")
@@ -890,7 +892,7 @@ subpop.comp <- function(XY, Resol_sub_pop) {
 # file_name=NULL
 # export_shp=FALSE
 # write_shp=FALSE
-# protec.areas=Madagascar.protec
+# protec.areas=NULL
 # map_pdf=FALSE
 # exclude.area=FALSE
 # method_protected_area="no_more_than_one"
@@ -900,7 +902,8 @@ subpop.comp <- function(XY, Resol_sub_pop) {
 # SubPop=T
 # alpha=1
 # method.range="convex.hull"
-# write.results=TRUE
+# verbose=TRUE
+# showWarnings=TRUE
 
 IUCN.eval <- function (DATA, country_map=NULL, Cell_size_AOO=2, Cell_size_locations=10, Resol_sub_pop=5, method_locations="fixed_grid", Rel_cell_size=0.05, DrawMap=TRUE, 
                        add.legend=TRUE,

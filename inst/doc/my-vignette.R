@@ -21,12 +21,16 @@ EOO.results <- EOO.computing(MyData, export_shp = T)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 plot(EOO.results[[1]][[2]], col="grey")
+
+## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 data(land)
+
+## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
+plot(EOO.results[[1]][[2]], col="grey")
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 plot(EOO.results[[2]][[2]], col="red")
-data(land)
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE-------------------------------------------

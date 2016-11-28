@@ -9,7 +9,7 @@ output:
     number_sections: true
     fig_caption: true
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{ConR for beginners in R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,37 +20,20 @@ vignette: >
 
 **First step**. Install [R](https://cran.r-project.org/).
 
-
-
-**Second step**. Other R packages are needed for running the  ConR package.
-Normally these packages are installed automatically when installing the ConR package.
-If not, this can be done by running the following code :
-```
-install.packages("raster")
-install.packages("sp")
-install.packages("grDevices")
-install.packages("rgdal")
-install.packages("rgeos")
-install.packages("spatstat")
-install.packages("geosphere")
-install.packages("maptools")
-install.packages("fields")
-```
-
-**Third step**. A proper way to work with R is to define a working directory. I advise to create a directory near the root (easier to handle), for example, here, named *Your_R_directory*
+**Second step**. A proper way to work with R is to define a working directory. I advise to create a directory near the root (easier to handle), for example, here, named *Your_R_directory*
 Now you can set your working directory by the following code:
 ```
 setwd("C:/Your_R_directory/"")
 ```
 
-**Fourth step**, copy the file *ConR_1.0.tar.gz* in this directory.
+**Third step**, copy the file *ConR_1.0.tar.gz* in this directory.
 Do not unzip this file.
 Now you can install the ConR package using the following line code:
 ```
 install.packages(pkgs="C:/Your_R_directory/ConR_1.0.tar.gz", repos=NULL, type="source")
 ```
 
-Note that the above procedures should be done only once, except the code for setting the working directory (third step).
+Note that the above procedures should be done only once, except the code for setting the working directory (second step).
 
 
 # Attaching (loading) ConR
@@ -149,8 +132,9 @@ EOO.computing(MyData)
 ```
 You can see that in this example, the input file contained occurrences for four species.
 
-By default, a csv file is created in your working directory *Your_R_directory*. This csv file is named by default *EOO.results.csv*
-You can change the file name for example by the name *MyResults* using the following code line:
+By default, a csv file is created in your working directory *Your_R_directory*. This csv file is named by default *EOO.results.csv*.
+
+You can modify the name of the exported file using the following code line (for this example by the name *MyResults*) :
 ```
 EOO.computing(MyData, file.name = "MyResults")
 ```
@@ -160,8 +144,8 @@ EOO.computing(MyData, file.name = "MyResults")
 
 ## Exporting shapefiles used to estimate EOO
 
-It is possible to export in R the spatial polygon object used for estimating the EOO. This is done by using the argument `export_shp` which is a logical argument. A logical argument can take only two values: `T` for TRUE and `F` for FALSE.
-By default, this argument is specified as FALSE. Hence, if you want to get these spatial polygons, you have specify it using the following code:
+It is possible to export in R the spatial polygon object used for estimating the EOO. This is done by using the argument `export_shp` which is a logical argument. A logical argument can take only two values: `TRUE` and `FALSE`.
+By default, this argument is specified as `FALSE`. Hence, if you want to get these spatial polygons, you have specify it using the following code:
 ```{r include=TRUE, echo = TRUE}
 EOO.computing(MyData, export_shp = T)
 ```
@@ -177,29 +161,42 @@ EOO.results <- EOO.computing(MyData)
 EOO.results <- EOO.computing(MyData, export_shp = T)
 ```
 
-Then, for the first species (mapped in grey):
+Then, for the first species (mapped in grey color):
 
 ```{r include=TRUE, echo = TRUE, dev.args=list(pointsize=2)}
 plot(EOO.results[[1]][[2]], col="grey")
+```
+
+You can add a **background** showing the land cover. ConR include a shape file of land cover representing a default world land map, which can be loaded by running the following code (to be done only once during your working session, it attachs the object land in the R environment:
+```{r include=TRUE, echo = TRUE, dev.args=list(pointsize=2)}
 data(land)
+```
+
+Now you can add the land cover as a background by running the following code:
+```{r include=TRUE, echo = TRUE, dev.args=list(pointsize=2)}
+plot(EOO.results[[1]][[2]], col="grey")
 plot(land, add=T)
 ```
 
-For the second species (mapped in red)
+For mapping the convex hull of the second species (mapped in red)
 
 ```{r include=TRUE, echo = TRUE, dev.args=list(pointsize=2)}
 plot(EOO.results[[2]][[2]], col="red")
-data(land)
 plot(land, add=T)
 ```
-
-  Note that after plotting the spatial polygon by the code ```plot(EOO.results[[2]][[2]]```, another spatial polygon is added as a **background** representing a default world land map. This map is loaded by the code `data(land)`.
 
 
   You may want to **use your own land cover background shapefile**.
 This is easily done by using the function [```readShapePoly```](https://r-how.com/packages/maptools/readShapePoly).
+
+For using this function, you first has to install (if not yet installed) and load the package 
+[maptools](https://CRAN.R-project.org/package=maptools).
+
+`install.packages("maptools")`
+`library(maptools)`
+
 For example, for importing a shapefile named *MyShapefile*, just run the code (after transferring your file into *Your_R_directory*) :
-`readShapePoly(MyShapefile, proj4string=CRS ("+proj=longlat +datum=WGS84"))`.
+`readShapePoly(MyShapefile, proj4string=CRS ("+proj=longlat +datum=WGS84"))`
 
 ---------------------------------------
 
@@ -657,7 +654,7 @@ The legend shows the results. 75% of occurrences are within protected areas. Two
 
 
 * `method_protected_area = "other"`
-In that case, occurrences within and outside protected area are threated separately by the same procedure: overlaying of grid of a given resolution.
+In that case, occurrences within and outside protected area are treated separately by the same procedure: overlaying of grid of a given resolution.
 ```
 data(Madagascar.protec)
 IUCN.eval(MyData, Cell_size_locations = 10, protec.areas = Madagascar.protec, method_protected_area = "other")
