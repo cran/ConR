@@ -95,9 +95,9 @@ head(dataset.ex)
 ```
 The following dataset include occurrences of Malagasy amphibian:
 ```
-data(Malagasy_amphibian)
-head(Malagasy_amphibian)
-?Malagasy_amphibian ## if you want to have information on this dataset
+data(Malagasy.amphibian)
+head(Malagasy.amphibian)
+?Malagasy.amphibian ## if you want to have information on this dataset
 ```
 
 
@@ -196,7 +196,7 @@ For using this function, you first has to install (if not yet installed) and loa
 `library(maptools)`
 
 For example, for importing a shapefile named *MyShapefile*, just run the code (after transferring your file into *Your_R_directory*) :
-`readShapePoly(MyShapefile, proj4string=CRS ("+proj=longlat +datum=WGS84"))`
+`readShapePoly("MyShapefile", proj4string=CRS("+proj=longlat +datum=WGS84"))`
 
 ---------------------------------------
 
@@ -496,8 +496,8 @@ If the optional fields *higher.tax.rank* and *coly* are provided, output maps di
 <img src="MyIUCNresults_results_map/MyIUCNresultsBerlinia_bruneelii.png" alt="Drawing" title="Example of a map output exported in IUCN__results_map directory " style="width: 600px;"/>
 
 ```{r include=FALSE, echo=FALSE}
-data(Malagasy_amphibian)
-MyData <- Malagasy_amphibian[which(Malagasy_amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
+data(Malagasy.amphibian)
+MyData <- Malagasy.amphibian[which(Malagasy.amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
 IUCN.eval(MyData, Cell_size_locations = 10)
 ```
 
@@ -565,8 +565,8 @@ Below is an example for amphibian species of Madagascar.
 
 First, for the example, I select one species among the Malagasy amphibians example dataset included in the package loaded by using the `data()` function:
 ```{r include=TRUE}
-data(Malagasy_amphibian)
-MyData <- Malagasy_amphibian[which(Malagasy_amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
+data(Malagasy.amphibian)
+MyData <- Malagasy.amphibian[which(Malagasy.amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
 ```
 
 
@@ -671,7 +671,7 @@ IUCN.eval(MyData, Cell_size_locations = 10, file_name = "protec2", protec.areas 
 **Note 1:**
 Only a map of protected areas from Madagascar is included in ConR, as an example dataset. If you want to import your own protected area shapefile, you can do it by using the function [```readShapePoly```](https://r-how.com/packages/maptools/readShapePoly). Protected area shapefile can be freely dowloaded from the World Database on Protected Areas (WDPA, http://www.protectedplanet.net/).
 For example, for importing a shapefile names *MyShapefile*, just run the code (after transferring your file into *Your_R_directory*) :
-`readShapePoly(MyShapefile, proj4string=CRS ("+proj=longlat +datum=WGS84"))`.
+`readShapePoly("MyShapefile" , proj4string=CRS("+proj=longlat +datum=WGS84"))`.
 
 **Note 2:**
 The protected areas shapefile should be given as `SpatialPolygonsDataFrame` in the argument `protec.areas` as above. The argument `ID_shape_PA` should also be given and should represent the unique ID of each protected area in the provided shapefile. This can be checked by the following code:
@@ -692,20 +692,20 @@ Below, preliminary conservation status of all malagasy amphibian species of the 
 This computation should be relatively time consuming (depending on the computer power) given the number of species assessed, so be patient.
 ```{r include=F, echo=F}
 data(Madagascar.protec)
-data(Malagasy_amphibian)
-MyResults <- IUCN.eval(Malagasy_amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE)
+data(Malagasy.amphibian)
+MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE)
 ```
 
 ```
 data(Madagascar.protec)
-data(Malagasy_amphibian)
-MyResults <- IUCN.eval(Malagasy_amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE)
+data(Malagasy.amphibian)
+MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE)
 ```
 
 You can map the result by using the following code:
 ```
 data(land)
-map.res(MyResults, Occurrences=Malagasy_amphibian, country_map=land, export_map=TRUE, threshold=3, 
+map.res(MyResults, Occurrences=Malagasy.amphibian, country_map=land, export_map=TRUE, threshold=3, 
  	LatMin=-25,LatMax=-12,LongMin=42, LongMax=52, Resol=1)
 ```
 The argument `Occurrences` should include the input file.
@@ -724,9 +724,13 @@ The arguments `LatMin`, `LatMax`, `LongMin` and `LongMax` are minimum/maximum la
 
 ```{r include=F, echo=F}
 MyResults <- read.csv("IUCN_results.csv", row.names=1)
-map.res(MyResults, Occurrences=Malagasy_amphibian, country_map=land, export_map=TRUE, threshold=3, 
+map.res(MyResults, Occurrences=Malagasy.amphibian, country_map=land, export_map=TRUE, threshold=3, 
  	LatMin=-25,LatMax=-12,LongMin=42, LongMax=52, Resol=1)
 ```
+
+
+Maps should have been created in your working directory.
+
 
 <img src="IUCN__results_map/number_threatened_sp.png" alt="Drawing" title="Example of a map output exported in IUCN__results_map directory " style="width: 600px;"/>
 
@@ -740,6 +744,8 @@ map.res(MyResults, Occurrences=Malagasy_amphibian, country_map=land, export_map=
 ```{r include=F, echo=F}
 files <- list.files(paste(getwd(), "/MyIUCNresults_results_map/", sep=""), full.names = T)
 file.remove(files[-grep("Berlinia_bruneelii", files)])
+#files <- list.files(paste(getwd(), "/", sep=""), full.names = T)
+#unlink(files[grep("Berlinia_bruneelii", files)])
 ```
 
 

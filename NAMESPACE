@@ -14,18 +14,22 @@ importFrom(rgdal, "writeOGR")
 
 importFrom(spatstat, "union.owin", "area.owin", "setminus.owin", "as.owin")
 
+importFrom(spatstat.utils, "is.hole.xypolygon")
+
+
+
 importFrom(fields, "image.plot", "quilt.plot", "two.colors")
 
 # importFrom(alphahull, "ahull", "anglesArc")
 
-importFrom(geosphere, "areaPolygon")
+importFrom(geosphere, "areaPolygon", "makePoly", "makeLine")
 
 
 
 importFrom("graphics", "axis", "box", "layout", "legend", "mtext",
              "par", "points")
 importFrom("methods", "as", "slot")
-importFrom("stats", "cor", "dist")
+importFrom("stats", "cor", "dist", "runif")
 importFrom("utils", "data", "installed.packages", "write.csv")
 importFrom("grDevices", "dev.cur", "dev.off", "grey", "pdf", "png",
              "rgb")

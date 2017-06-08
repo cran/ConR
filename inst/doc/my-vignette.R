@@ -134,8 +134,8 @@ knitr::kable(head(MyResults))
 MyResults <- IUCN.eval(MyData2, file_name="MyIUCNresults")
 
 ## ----include=FALSE, echo=FALSE-------------------------------------------
-data(Malagasy_amphibian)
-MyData <- Malagasy_amphibian[which(Malagasy_amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
+data(Malagasy.amphibian)
+MyData <- Malagasy.amphibian[which(Malagasy.amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
 IUCN.eval(MyData, Cell_size_locations = 10)
 
 ## ----include=F, echo=F---------------------------------------------------
@@ -150,8 +150,8 @@ MyResults <- IUCN.eval(MyData, Cell_size_AOO = 20)
 MyResults
 
 ## ----include=TRUE--------------------------------------------------------
-data(Malagasy_amphibian)
-MyData <- Malagasy_amphibian[which(Malagasy_amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
+data(Malagasy.amphibian)
+MyData <- Malagasy.amphibian[which(Malagasy.amphibian[,"tax"] %in% c("Anodonthyla moramora")),]
 
 ## ----include=T, echo=T---------------------------------------------------
 IUCN.eval(MyData, Cell_size_locations = 10)
@@ -187,15 +187,17 @@ IUCN.eval(MyData, Cell_size_locations = 10, file_name = "protec2", protec.areas 
 
 ## ----include=F, echo=F---------------------------------------------------
 data(Madagascar.protec)
-data(Malagasy_amphibian)
-MyResults <- IUCN.eval(Malagasy_amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE)
+data(Malagasy.amphibian)
+MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE)
 
 ## ----include=F, echo=F---------------------------------------------------
 MyResults <- read.csv("IUCN_results.csv", row.names=1)
-map.res(MyResults, Occurrences=Malagasy_amphibian, country_map=land, export_map=TRUE, threshold=3, 
+map.res(MyResults, Occurrences=Malagasy.amphibian, country_map=land, export_map=TRUE, threshold=3, 
  	LatMin=-25,LatMax=-12,LongMin=42, LongMax=52, Resol=1)
 
 ## ----include=F, echo=F---------------------------------------------------
 files <- list.files(paste(getwd(), "/MyIUCNresults_results_map/", sep=""), full.names = T)
 file.remove(files[-grep("Berlinia_bruneelii", files)])
+#files <- list.files(paste(getwd(), "/", sep=""), full.names = T)
+#unlink(files[grep("Berlinia_bruneelii", files)])
 
