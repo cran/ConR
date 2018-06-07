@@ -1,4 +1,7 @@
 
+
+
+
 .Convex.Hull.Poly <- function(XY) {
   hpts <- chull(x =  XY[,1], y = XY[,2]) ; hpts <- c(hpts, hpts[1])
   coord <- matrix(NA, length(hpts), 2)
@@ -110,7 +113,7 @@
 
 
 .EOO.comp <-  function(XY, exclude.area=FALSE, buff_width=0.1, country_map=NULL, Name_Sp="tax", alpha.hull=FALSE, convex.hull=TRUE,
-                       alpha=1, buff.alpha=0.1, method.less.than3="not comp", verbose=TRUE) {
+                       alpha=1, buff.alpha=0.1, method.less.than3="not comp") { # , verbose=TRUE
   
   ### Checking if the method of calculating EOO has been chosen
   if(!convex.hull & !alpha.hull) stop("alpha.hull and convex.hull are both FALSE, choose one of them")
@@ -194,7 +197,7 @@
     names(OUTPUT) <- c("EOO", "spatial.polygon")
   }
   
-  if(verbose) cat(" ",paste(Name_Sp,"EOO comp."))
+  # if(verbose) cat(" ",paste(Name_Sp,"EOO comp."))
   
   return(OUTPUT)
 }
@@ -204,13 +207,13 @@ EOO.computing <- function(XY, exclude.area=FALSE, country_map=NULL, export_shp=F
                             alpha=1, buff.alpha=0.1, method.range="convex.hull",
                             Name_Sp="Species1", 
                             buff_width=0.1, method.less.than3="not comp",
-                            write.results=TRUE, 
-                            file.name="EOO.results", verbose=TRUE){
+                            write_results=TRUE, 
+                            file.name="EOO.results", parallel=F, NbeCores=2, show_progress=F){ # , verbose=TRUE
   
   if(any(is.na(XY[,c(1:2)]))) {
     length(which(rowMeans(is.na(XY[,1:2]))>0))
     unique(XY[which(rowMeans(is.na(XY[,1:2]))>0),3])
-    if(verbose) print(paste("Skipping",length(which(rowMeans(is.na(XY[,1:2]))>0)) ,"occurrences because of missing coordinates for", 
+    print(paste("Skipping",length(which(rowMeans(is.na(XY[,1:2]))>0)) ,"occurrences because of missing coordinates for",  # if(verbose) 
                 paste(as.character(unique(XY[which(rowMeans(is.na(XY[,1:2]))>0),3])), collapse=" AND ") ))
     XY <- XY[which(!is.na(XY[,1])),]
     XY <- XY[which(!is.na(XY[,2])),]
@@ -241,10 +244,29 @@ EOO.computing <- function(XY, exclude.area=FALSE, country_map=NULL, export_shp=F
     list_data <- list(XY)
   }
   
-  OUTPUT <- lapply(list_data, function(x) .EOO.comp(x, Name_Sp=ifelse(ncol(XY)>2, as.character(unique(x$tax)), Name_Sp), 
-                                                    exclude.area=exclude.area, buff_width=buff_width, country_map=country_map, 
-                                                    alpha=alpha, buff.alpha=buff.alpha, alpha.hull=alpha.hull, convex.hull=convex.hull,
-                                                    method.less.than3=method.less.than3, verbose=verbose))
+  # OUTPUT <- lapply(list_data, function(x) .EOO.comp(x, Name_Sp=ifelse(ncol(XY)>2, as.character(unique(x$tax)), Name_Sp),
+  #                                                   exclude.area=exclude.area, buff_width=buff_width, country_map=country_map,
+  #                                                   alpha=alpha, buff.alpha=buff.alpha, alpha.hull=alpha.hull, convex.hull=convex.hull,
+  #                                                   method.less.than3=method.less.than3)) # , verbose=verbose
+  
+  if(show_progress) prog. <- "text"
+  if(!show_progress) prog. <- "none"
+
+  if(parallel) registerDoParallel(NbeCores)
+
+  OUTPUT <- llply(list_data, .fun=function(x) {
+    .EOO.comp(x, Name_Sp=ifelse(ncol(XY)>2, as.character(unique(x$tax)), Name_Sp),
+              exclude.area=exclude.area, buff_width=buff_width, country_map=country_map,
+              alpha=alpha, buff.alpha=buff.alpha, alpha.hull=alpha.hull, convex.hull=convex.hull,
+              method.less.than3=method.less.than3) # , verbose=verbose
+  }
+  , .progress = prog., .parallel=parallel)
+
+
+  if(parallel) stopImplicitCluster()
+  
+  
+  
   if(length(OUTPUT)==1) names(OUTPUT) <- Name_Sp
   
   if(write_shp) {
@@ -275,7 +297,7 @@ EOO.computing <- function(XY, exclude.area=FALSE, country_map=NULL, export_shp=F
   Results_short <- as.data.frame(t(Results_short))
   colnames(Results_short) <- "EOO"
   
-  if(write.results) write.csv(Results_short, paste(getwd(),"/", file.name, ".csv", sep=""))
+  if(write_results) write.csv(Results_short, paste(getwd(),"/", file.name, ".csv", sep=""))
   
   if(!export_shp) OUTPUT <- Results_short
   
@@ -432,7 +454,7 @@ subpop.comp <- function(XY, Resol_sub_pop=NULL) {
                            "Category_AOO","Category_EOO")
   }
   
-  if(verbose) cat(" ",paste("Evaluation of", as.character(NamesSp)))
+  # if(verbose) cat(" ",paste("Evaluation of", as.character(NamesSp)))
   
   XY <- DATA[,c(2:1)]
   ### Projection into equal area cylindrical
@@ -613,7 +635,7 @@ subpop.comp <- function(XY, Resol_sub_pop=NULL) {
     
     EOO_ <- EOO.computing(XY[,c(2,1)], exclude.area=exclude.area, country_map=poly_borders, Name_Sp=NamesSp, 
                           buff_width=buff_width, export_shp=TRUE,
-                          alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, write.results=FALSE, verbose=FALSE)
+                          alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, write_results=FALSE) # , verbose=FALSE
     p1 <- EOO_[[1]][[2]]
     EOO <- EOO_[[1]][[1]]
     
@@ -672,7 +694,7 @@ subpop.comp <- function(XY, Resol_sub_pop=NULL) {
     if(Rank_CriteriaB==2) Cat <- "EN"
     if(Rank_CriteriaB==3 && Nbe_Loc>0 && Nbe_Loc<11) Cat <- "VU"
 
-    if(Rank_CriteriaB>3 && Nbe_Loc>=0) Cat <- "LC" ### 
+    if(Rank_CriteriaB>3 && Nbe_Loc>=0) Cat <- "LC or NT" ### 
 
     if(Rank_B1a>Rank_B2a) Cat_Code <- paste(Cat,"B2a")
     if(Rank_B1a<Rank_B2a) Cat_Code <- paste(Cat,"B1a")
@@ -680,7 +702,7 @@ subpop.comp <- function(XY, Resol_sub_pop=NULL) {
     
     if(!is.null(protec.areas)) {
       if(as.numeric(Results["Ratio_occ_within_PA",1])==100){
-        Results["Category_CriteriaB",1] <- "NT or LC"
+        Results["Category_CriteriaB",1] <- "LC or NT"
         Results["Category_code",1] <- Cat_Code 
       }else{
         Results["Category_CriteriaB",1] <- Cat
@@ -694,12 +716,12 @@ subpop.comp <- function(XY, Resol_sub_pop=NULL) {
     if(Rank_B2a==1) Results["Category_AOO",1] <- "CR"
     if(Rank_B2a==2) Results["Category_AOO",1] <- "EN"
     if(Rank_B2a==3) Results["Category_AOO",1] <- "VU"
-    if(Rank_B2a>3) Results["Category_AOO",1] <- "NT or LC"
+    if(Rank_B2a>3) Results["Category_AOO",1] <- "LC or NT"
     
     if(Rank_B1a==1) Results["Category_EOO",1] <- "CR"
     if(Rank_B1a==2) Results["Category_EOO",1] <- "EN"
     if(Rank_B1a==3) Results["Category_EOO",1] <- "VU"
-    if(Rank_B1a>3) Results["Category_EOO",1] <- "NT or LC"
+    if(Rank_B1a>3) Results["Category_EOO",1] <- "LC or NT"
     
   }else{ ### if less than 3 uniques occurrences
     
@@ -732,41 +754,56 @@ subpop.comp <- function(XY, Resol_sub_pop=NULL) {
         ### If all occurences are found within protected areas, the species is considered as not threatened
         Results["Category_CriteriaB",1] <- "LC or NT"
       }else{
-        if(Results["Nbe_loc",1]==1 & Results["AOO",1]<10){
-          ### If one location and AOO<10 --> CR
-          Results["Category_CriteriaB",1] <- "CR"
-          Results["Category_AOO",1] <- "CR"
-        }
-        if(Results["Nbe_loc",1]>1 & Results["AOO",1]<10) {
-          ### If more than one location and AOO<10 --> EN
-          Results["Category_CriteriaB",1] <- "EN"
-          Results["Category_AOO",1] <- "EN"
+        if(Results["AOO",1] < 10 & Results["Nbe_loc",1]==1) {
+          Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "CR"
+          
+        }else{
+          if(Results["AOO",1] < 500 & Results["Nbe_loc",1]<6) {
+            Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "EN"
+            
+          }else{
+            if(Results["AOO",1] < 2000 & Results["Nbe_loc",1]<11) {
+              Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "VU"
+              
+            }else{
+              Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "LC or NT"
+            }
+          }
         }
       }
     }else{
-      if(Results["Nbe_loc",1]==1 & Results["AOO",1]<10){
-        ### If one location and AOO<10 --> CR
-        Results["Category_CriteriaB",1] <- "CR"
-        Results["Category_AOO",1] <- "CR"
-      }
-      if(Results["Nbe_loc",1]>1 & Results["AOO",1]<10) {
-        ### If more than one location and AOO<10 --> EN
-        Results["Category_CriteriaB",1] <- "EN"
-        Results["Category_AOO",1] <- "EN"
+      if(Results["AOO",1] < 10 & Results["Nbe_loc",1]==1) {
+        Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "CR"
+      }else{
+        if(Results["AOO",1] < 500 & Results["Nbe_loc",1]<6) {
+          Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "EN"
+          
+        }else{
+          if(Results["AOO",1] < 2000 & Results["Nbe_loc",1]<11) {
+            Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "VU"
+            
+          }else{
+            Results["Category_AOO",1] <- Results["Category_CriteriaB",1] <- "LC or NT"
+          }
+        }
       }
     }
     
     if(is.na(Results["Category_AOO",1])) {
-      if(Results["AOO",1] < 500) {
-          Results["Category_CriteriaB",1] <- "EN"
-          Results["Category_AOO",1] <- "EN"
+      if(Results["AOO",1] < 10 & Results["Nbe_loc",1]==1) {
+        Results["Category_AOO",1] <- "CR"
+        
       }else{
-        if(Results["AOO",1] < 2000) {
-          Results["Category_CriteriaB",1] <- "VU"
-          Results["Category_AOO",1] <- "VU"
+        if(Results["AOO",1] < 500 & Results["Nbe_loc",1]<6) {
+          Results["Category_AOO",1] <- "EN"
+          
         }else{
-          Results["Category_CriteriaB",1] <- "LC or NT"
-          Results["Category_AOO",1] <- "LC or NT"
+          if(Results["AOO",1] < 2000 & Results["Nbe_loc",1]<11) {
+            Results["Category_AOO",1] <- "VU"
+            
+          }else{
+            Results["Category_AOO",1] <- "LC or NT"
+          }
         }
       }
     }
@@ -966,18 +1003,21 @@ IUCN.eval <- function (DATA, country_map = NULL, Cell_size_AOO = 2, Cell_size_lo
                        Resol_sub_pop = 5, method_locations = "fixed_grid", Rel_cell_size = 0.05, 
                        DrawMap = TRUE, add.legend = TRUE, 
                        file_name = NULL, export_shp = FALSE, write_shp = FALSE, 
-                       write.results=TRUE, protec.areas = NULL, map_pdf = FALSE, draw.poly.EOO=TRUE, 
+                       write_results=TRUE, protec.areas = NULL, map_pdf = FALSE, draw.poly.EOO=TRUE, 
                        exclude.area = FALSE, method_protected_area = "no_more_than_one", 
                        ID_shape_PA = "WDPA_PID", 
                        buff_width = 0.1, SubPop=TRUE, alpha=1, buff.alpha=0.1, 
                        method.range="convex.hull", nbe.rep.rast.AOO=NULL,
-                       verbose=TRUE, showWarnings=TRUE) {
+                        showWarnings=TRUE, # verbose=TRUE,
+                       write_file_option="excel", parallel=F, NbeCores=2) {
   
-  if(class(DATA)=="spgeoIN") {
+  if(class(DATA)[1]=="spgeoIN") {
     DATA_2 <- cbind(DATA$species_coordinates, DATA$identifier)
     DATA <- DATA_2[,c(2,1,3)]
   }
   colnames(DATA)[1:3] <- c("ddlat","ddlon","tax")
+  
+  if(is_tibble(DATA)) DATA <- as.data.frame(DATA)
   
   if(any(is.na(DATA[,1:2]))) {
     length(which(rowMeans(is.na(DATA[,1:2]))>0))
@@ -990,7 +1030,11 @@ IUCN.eval <- function (DATA, country_map = NULL, Cell_size_AOO = 2, Cell_size_lo
   
   if(is.factor(DATA[,"tax"])) DATA[,"tax"] <- as.character(DATA[,"tax"])
   
-  if(!is.numeric(DATA[,1]) || !is.numeric(DATA[,2])) stop("coordinates in DATA should be numeric")
+  
+  if(!is.numeric(DATA[,1]) || !is.numeric(DATA[,2]) ) {
+    if(!is.double(DATA[,1]) || !is.double(DATA[,2])) stop("coordinates in DATA should be numeric")
+  }
+  
   if(any(DATA[,1]>180) || any(DATA[,1]< -180)|| any(DATA[,2]< -180) || any(DATA[,2]>180)) stop("coordinates are outside of expected range")
   if(!is.null(country_map)) if(!class(country_map)=="SpatialPolygonsDataFrame") stop("Country_map should be a spatialpolygondataframe")
   if(!is.null(protec.areas)) {
@@ -1030,14 +1074,65 @@ IUCN.eval <- function (DATA, country_map = NULL, Cell_size_AOO = 2, Cell_size_lo
     pdf(paste(paste(getwd(),paste("/",FILE_NAME,"_results_map", sep=""), sep=""),"/","results.pdf", sep=""), width=25, height=25)
   }
   
-  Results <- lapply(list_data, function(x) .IUCN.comp(x, NamesSp=as.character(unique(x$tax)), DrawMap=DrawMap, exclude.area=exclude.area,
-                                                     write_shp=write_shp, poly_borders=country_map, method_protected_area=method_protected_area, 
-                                                     Cell_size_AOO=Cell_size_AOO, Cell_size_locations=Cell_size_locations, Resol_sub_pop=Resol_sub_pop,
-                                                     method_locations=method_locations,file_name=file_name, buff_width=buff_width, map_pdf=map_pdf,
-                                                     ID_shape_PA=ID_shape_PA, SubPop=SubPop,protec.areas=protec.areas, 
-                                                     MinMax=c(min(DATA[,2]), max(DATA[,2]), min(DATA[,1]), max(DATA[,1])),
-                                                     alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, 
-                                                     nbe.rep.rast.AOO=nbe.rep.rast.AOO, verbose=verbose, showWarnings=showWarnings, draw.poly.EOO=draw.poly.EOO))
+  
+  # system.time(Results <- lapply(list_data, function(x) .IUCN.comp(x, NamesSp=as.character(unique(x$tax)), DrawMap=DrawMap, exclude.area=exclude.area,
+  #                                                    write_shp=write_shp, poly_borders=country_map, method_protected_area=method_protected_area, 
+  #                                                    Cell_size_AOO=Cell_size_AOO, Cell_size_locations=Cell_size_locations, Resol_sub_pop=Resol_sub_pop,
+  #                                                    method_locations=method_locations,file_name=file_name, buff_width=buff_width, map_pdf=map_pdf,
+  #                                                    ID_shape_PA=ID_shape_PA, SubPop=SubPop,protec.areas=protec.areas, 
+  #                                                    MinMax=c(min(DATA[,2]), max(DATA[,2]), min(DATA[,1]), max(DATA[,1])),
+  #                                                    alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, 
+  #                                                    nbe.rep.rast.AOO=nbe.rep.rast.AOO, verbose=verbose, showWarnings=showWarnings, draw.poly.EOO=draw.poly.EOO))
+  # )
+  
+  # pb <- progress_bar$new(total = length(list_data))
+  # 
+  # Results <- list()
+  # 
+  #   for (i in 1:length(list_data)) {
+  #     pb$tick()
+  #     
+  #     Results[[i]] <-
+  #       .IUCN.comp(list_data[[i]], NamesSp=as.character(unique(list_data[[i]]$tax)), DrawMap=DrawMap, exclude.area=exclude.area,
+  #                  write_shp=write_shp, poly_borders=country_map, method_protected_area=method_protected_area, 
+  #                  Cell_size_AOO=Cell_size_AOO, Cell_size_locations=Cell_size_locations, Resol_sub_pop=Resol_sub_pop,
+  #                  method_locations=method_locations,file_name=file_name, buff_width=buff_width, map_pdf=map_pdf,
+  #                  ID_shape_PA=ID_shape_PA, SubPop=SubPop,protec.areas=protec.areas, 
+  #                  MinMax=c(min(DATA[,2]), max(DATA[,2]), min(DATA[,1]), max(DATA[,1])),
+  #                  alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, 
+  #                  nbe.rep.rast.AOO=nbe.rep.rast.AOO, verbose=verbose, showWarnings=showWarnings, draw.poly.EOO=draw.poly.EOO)
+  #     
+  #     
+  #   }
+  
+  # Results <-
+  #     plyr::llply(list_data, .fun=function(x) .IUCN.comp(x, NamesSp=as.character(unique(x$tax)), DrawMap=DrawMap, exclude.area=exclude.area,
+  #                                                    write_shp=write_shp, poly_borders=country_map, method_protected_area=method_protected_area, 
+  #                                                    Cell_size_AOO=Cell_size_AOO, Cell_size_locations=Cell_size_locations, Resol_sub_pop=Resol_sub_pop,
+  #                                                    method_locations=method_locations,file_name=file_name, buff_width=buff_width, map_pdf=map_pdf,
+  #                                                    ID_shape_PA=ID_shape_PA, SubPop=SubPop,protec.areas=protec.areas, 
+  #                                                    MinMax=c(min(DATA[,2]), max(DATA[,2]), min(DATA[,1]), max(DATA[,1])),
+  #                                                    alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, 
+  #                                                    nbe.rep.rast.AOO=nbe.rep.rast.AOO, verbose=verbose, 
+  #                                                    showWarnings=showWarnings, draw.poly.EOO=draw.poly.EOO), .progress = "text")
+
+  if(parallel) registerDoParallel(NbeCores)
+  
+  Results <- llply(list_data, .fun=function(x) {
+    .IUCN.comp(x, NamesSp=as.character(unique(x$tax)), DrawMap=DrawMap, exclude.area=exclude.area,
+               write_shp=write_shp, poly_borders=country_map, method_protected_area=method_protected_area, 
+               Cell_size_AOO=Cell_size_AOO, Cell_size_locations=Cell_size_locations, Resol_sub_pop=Resol_sub_pop,
+               method_locations=method_locations,file_name=file_name, buff_width=buff_width, map_pdf=map_pdf,
+               ID_shape_PA=ID_shape_PA, SubPop=SubPop,protec.areas=protec.areas, 
+               MinMax=c(min(DATA[,2]), max(DATA[,2]), min(DATA[,1]), max(DATA[,1])),
+               alpha=alpha, buff.alpha=buff.alpha, method.range=method.range, 
+               nbe.rep.rast.AOO=nbe.rep.rast.AOO, #verbose=TRUE, verbose=verbose, 
+               showWarnings=showWarnings, draw.poly.EOO=draw.poly.EOO)
+                }
+                , .progress = "text", .parallel=parallel)
+  
+  
+  if(parallel) stopImplicitCluster()
   
   if(map_pdf) dev.off()
   
@@ -1046,15 +1141,20 @@ IUCN.eval <- function (DATA, country_map = NULL, Cell_size_AOO = 2, Cell_size_lo
   Results_short <- as.data.frame(do.call(rbind, Results_short), stringsAsFactors=FALSE)
   Results_short[,1:4] <- apply(Results_short[,1:4], MARGIN = 2, as.numeric)
   
-  if(write.results) {
+  if(write_results) {
       if(!is.null(file_name)) {
         NAME_FILE <- file_name
     }else{
         NAME_FILE <- "IUCN_results"
-  }
+    }
     
-  write.csv(Results_short, paste(getwd(),"/", NAME_FILE, ".csv", sep=""))
-    
+    if(write_file_option=="csv") write.csv(Results_short, paste(getwd(),"/", NAME_FILE, ".csv", sep=""))
+
+    if(write_file_option=="excel") {
+      Results_short <- data.frame(taxa=rownames(Results_short), Results_short)
+      write_xlsx(Results_short, path = paste(getwd(),"/", NAME_FILE, ".xlsx", sep=""))
+    }
+  
   }
 
   if(!export_shp) {

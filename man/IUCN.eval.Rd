@@ -12,24 +12,25 @@ IUCN.eval(DATA, country_map = NULL, Cell_size_AOO = 2, Cell_size_locations = 10,
 	Resol_sub_pop = 5, method_locations = "fixed_grid", Rel_cell_size = 0.05, 
 	DrawMap = TRUE, add.legend = TRUE, 
 	file_name = NULL, export_shp = FALSE, write_shp = FALSE, 
-	write.results=TRUE, protec.areas = NULL, map_pdf = FALSE, draw.poly.EOO=TRUE,
+	write_results=TRUE, protec.areas = NULL, map_pdf = FALSE, draw.poly.EOO=TRUE,
 	exclude.area = FALSE, method_protected_area = "no_more_than_one", 
 	ID_shape_PA = "WDPA_PID", 
 	buff_width = 0.1, SubPop=TRUE, alpha=1, buff.alpha=0.1, 
 	method.range="convex.hull", nbe.rep.rast.AOO=NULL,
-	verbose=TRUE, showWarnings=TRUE)
+	showWarnings=TRUE, write_file_option="excel", 
+	parallel=F, NbeCores=2)
 }
 \arguments{
-\item{DATA}{a \code{dataframe} or an object of class \code{spgeoIN} see \code{\link[speciesgeocodeR]{speciesgeocodeR}}. See Details}
+\item{DATA}{a \code{dataframe} or an object of class \code{spgeoIN} see \url{https://github.com/azizka/speciesgeocodeR}. See Details}
 
 \item{country_map}{a \code{SpatialPolygonsDataFrame} or \code{SpatialPolygons} showing for example countries or continent borders. 
 This shapefile will be used for cropping the \code{SpatialPolygons} used for EOO computation if \code{exclude.area} is TRUE. By default, it is \code{land}}
 
 \item{Cell_size_AOO}{a numeric, value indicating the grid size in decimal degrees used for estimating Area of Occupancy.  By default, equal to 2}
 
-\item{Cell_size_locations}{a numeric, value indicating the grid size in decimal degrees used for estimating the number of location. By default, equal to 10}
+\item{Cell_size_locations}{a numeric, value indicating the grid size in kilometres used for estimating the number of location. By default, equal to 10}
 
-\item{Resol_sub_pop}{a numeric, value indicating the radius size in decimal degrees used for estimating the number of sub-population. By default, equal to 5}
+\item{Resol_sub_pop}{a numeric, value indicating the radius size in kilometres used for estimating the number of sub-population. By default, equal to 5}
 
 \item{DrawMap}{a logical, if TRUE a map is produced for each species in png format, unless map_pdf is TRUE. By default, it is TRUE}
 
@@ -48,7 +49,9 @@ given by the maximum distance separating two occurrences multiplied by \code{Rel
 \item{write_shp}{a logical, if TRUE, shapefiles of \code{SpatialPolygons} used for EOO computation 
 are written as ESRI shapefiles in a sub-directory in the working directory. By default, it is FALSE}
 
-\item{write.results}{a logical, if TRUE, results are exported in csv file. By default, it is TRUE}
+\item{write_results}{a logical, if TRUE, results are exported in a file which can csv or excel, see write_file_option. By default, it is TRUE}
+
+\item{write_file_option}{a character, if "excel", results are exported in excel file, if "csv", results are exported in csv. By default, it is "excel"}
 
 \item{protec.areas}{a \code{SpatialPolygonsDataFrame}, shapefile with protected areas. 
 If provided, this will be taken into account for calculating number of location (see Details and \code{method_protected_area}). 
@@ -80,9 +83,11 @@ EOO is computed by first drawing this straight line and adding a buffer of \code
 
 \item{nbe.rep.rast.AOO}{a numeric, indicate the number of raster with random starting position for estimating the AOO. By default, it is NULL but some minimal translation of the raster are still done}
 
-\item{verbose}{a logical. Wether R should report information on progress}
-
 \item{showWarnings}{a logical. Wether R should report warnings}
+
+\item{parallel}{a logical. Wether running in parallel. By default, it is FALSE}
+
+\item{NbeCores}{an integer. Register the number of cores for parallel execution. By default, it is 2}
 
 }
 
@@ -174,7 +179,7 @@ Gilles Dauby
 \seealso{
 \url{https://CRAN.R-project.org/package=biogeo}
 
-\code{\link[speciesgeocodeR]{speciesgeocodeR}}
+\url{https://github.com/azizka/speciesgeocodeR}
 }
 
 

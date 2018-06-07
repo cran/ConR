@@ -44,7 +44,7 @@ This should be done everytime you open R.
 ```
 library(ConR)
 ```
-```{r include=FALSE}
+```{r loadData,include=FALSE}
 library(ConR)
 data(dataset.ex)
 MyData <- dataset.ex
@@ -72,7 +72,7 @@ The Extent of Occurrence (EOO) is
 ## Input file
 You can prepare an excel file with three different columns:
 
-```{r include=TRUE, echo=FALSE}
+```{r TableData,include=TRUE, echo=FALSE}
 knitr::kable(head(MyData))
 ```
 
@@ -187,7 +187,7 @@ plot(land, add=T)
 
 
   You may want to **use your own land cover background shapefile**.
-This is easily done by using the function [```readShapePoly```](https://r-how.com/packages/maptools/readShapePoly).
+This is easily done by using the function [```readShapePoly```](https://CRAN.R-project.org/package=maptools).
 
 For using this function, you first has to install (if not yet installed) and load the package 
 [maptools](https://CRAN.R-project.org/package=maptools).
@@ -405,7 +405,7 @@ IUCN.eval(MyData)
 ```
 Because the EOO computation (using `EOO.computing`, see 1.3) is included within `IUCN.eval` function, we have the **same arguments** available (see 1.3) and the **same warnings** (see 1.3.6)
 
-## Output values: IUCN categories and parameters estimation
+## Output: IUCN categories and parameters estimation
 
 The output of the function is a data frame that provides several paramaters as well as the preliminary IUCN category.  
 
@@ -418,13 +418,17 @@ MyResults <- IUCN.eval(MyData)
 head(MyResults)
 ```
 
-Note that by default, a csv file has been created in your working directory *Your_R_directory*. 
+Note that by default, an excel file has been created in your working directory *Your_R_directory*. 
+If you prefer to have your output exported as csv file, you can do it by changing the argument *write_file_option*:
+```
+IUCN.eval(DATA = MyData, write_file_option = "csv")
+```
 
 ```{r include=T, echo=FALSE}
 knitr::kable(head(MyResults))
 ```
 
-This csv file is named by default *IUCN_results.csv*
+This excel file is named by default *IUCN_results.xlsx*
 But you can change the file name using the following code:
 
 ```
@@ -669,7 +673,7 @@ IUCN.eval(MyData, Cell_size_locations = 10, file_name = "protec2", protec.areas 
 <img src="protec2_results_map/protec2Anodonthyla_moramora.png" alt="Drawing" title="Example of a map output exported in IUCN__results_map directory " style="width: 600px;"/>
 
 **Note 1:**
-Only a map of protected areas from Madagascar is included in ConR, as an example dataset. If you want to import your own protected area shapefile, you can do it by using the function [```readShapePoly```](https://r-how.com/packages/maptools/readShapePoly). Protected area shapefile can be freely dowloaded from the World Database on Protected Areas (WDPA, http://www.protectedplanet.net/).
+Only a map of protected areas from Madagascar is included in ConR, as an example dataset. If you want to import your own protected area shapefile, you can do it by using the function [```readShapePoly```](https://CRAN.R-project.org/package=maptools). Protected area shapefile can be freely dowloaded from the World Database on Protected Areas (WDPA, http://www.protectedplanet.net/).
 For example, for importing a shapefile names *MyShapefile*, just run the code (after transferring your file into *Your_R_directory*) :
 `readShapePoly("MyShapefile" , proj4string=CRS("+proj=longlat +datum=WGS84"))`.
 
@@ -678,6 +682,21 @@ The protected areas shapefile should be given as `SpatialPolygonsDataFrame` in t
 
 `colnames(Madagascar.protec@data)` with the malagasy protected area shapefile.
 
+
+*****
+*****
+# Compute in parallel
+
+For large datasets (typically more than 100 species or when producing maps is required), I recommand to run the computation in parallel, which is feasible by using the following code.
+
+
+```
+data(Madagascar.protec)
+IUCN.eval(MyData, Cell_size_locations = 10, protec.areas = Madagascar.protec, parallel=T, NbeCores=4)
+```
+   
+The argument `NbeCores` indicate the number of cores on which you want to run the analysis.
+For more information, see the package [doparallel](https://CRAN.R-project.org/package=doParallel).
 
 
 *****
@@ -690,16 +709,17 @@ Maps are drawn in fixed grid cells whose resolution and extent can be defined.
 Below, preliminary conservation status of all malagasy amphibian species of the example dataset are assessed by using the `IUCN.eval` function. Results are stored in an object MyResults.
 
 This computation should be relatively time consuming (depending on the computer power) given the number of species assessed, so be patient.
+For a high number of species, parallelizing is a good option for fastening the computation.
 ```{r include=F, echo=F}
 data(Madagascar.protec)
 data(Malagasy.amphibian)
-MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE)
+MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE, write_file_option="csv")
 ```
 
 ```
 data(Madagascar.protec)
 data(Malagasy.amphibian)
-MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE)
+MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", showWarnings = FALSE)
 ```
 
 You can map the result by using the following code:

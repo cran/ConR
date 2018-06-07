@@ -1,10 +1,10 @@
-## ----include=FALSE-------------------------------------------------------
+## ----loadData,include=FALSE----------------------------------------------
 library(ConR)
 data(dataset.ex)
 MyData <- dataset.ex
 MyData <- MyData[which(!MyData[,3] %in% c("species_1", "species_2")),]
 
-## ----include=TRUE, echo=FALSE--------------------------------------------
+## ----TableData,include=TRUE, echo=FALSE----------------------------------
 knitr::kable(head(MyData))
 
 ## ----include=TRUE--------------------------------------------------------
@@ -188,7 +188,7 @@ IUCN.eval(MyData, Cell_size_locations = 10, file_name = "protec2", protec.areas 
 ## ----include=F, echo=F---------------------------------------------------
 data(Madagascar.protec)
 data(Malagasy.amphibian)
-MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", verbose=FALSE, showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE)
+MyResults <- IUCN.eval(Malagasy.amphibian, protec.areas = Madagascar.protec, ID_shape_PA = "WDPA_PID", showWarnings = FALSE, DrawMap=FALSE, SubPop = FALSE, write_file_option="csv")
 
 ## ----include=F, echo=F---------------------------------------------------
 MyResults <- read.csv("IUCN_results.csv", row.names=1)
