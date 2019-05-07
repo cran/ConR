@@ -3,6 +3,7 @@ library(ConR)
 data(dataset.ex)
 MyData <- dataset.ex
 MyData <- MyData[which(!MyData[,3] %in% c("species_1", "species_2")),]
+MyData$tax <- as.character(MyData$tax)
 
 ## ----TableData,include=TRUE, echo=FALSE----------------------------------
 knitr::kable(head(MyData))
@@ -20,17 +21,17 @@ EOO.computing(MyData, export_shp = T)
 EOO.results <- EOO.computing(MyData, export_shp = T)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
-plot(EOO.results[[1]][[2]], col="grey")
+plot(EOO.results$spatial.polygon_1, col="grey")
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 data(land)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
-plot(EOO.results[[1]][[2]], col="grey")
+plot(EOO.results$spatial.polygon_1, col="grey")
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
-plot(EOO.results[[2]][[2]], col="red")
+plot(EOO.results$spatial.polygon_2, col="red")
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE-------------------------------------------
@@ -41,7 +42,7 @@ EOO.computing(MyData, exclude.area = F, country_map = land)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=4)---------------
 EOO.results <- EOO.computing(MyData, exclude.area = T, country_map = land, export_shp = T)
-plot(EOO.results[[2]][[2]], col="red")
+plot(EOO.results$spatial.polygon_2, col="red")
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE-------------------------------------------
@@ -49,17 +50,17 @@ EOO.computing(MyData, method.range = "alpha.hull")
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 EOO.results <- EOO.computing(MyData, method.range = "alpha.hull", export_shp = T)
-plot(EOO.results[[1]][[2]], col="red")
+plot(EOO.results$spatial.polygon_1, col="red")
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 EOO.results <- EOO.computing(MyData, method.range = "alpha.hull", export_shp = T, alpha=5)
-plot(EOO.results[[2]][[2]], col="red")
+plot(EOO.results$spatial.polygon_1, col="red")
 plot(land, add=T)
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 EOO.results <- EOO.computing(MyData, method.range = "alpha.hull", export_shp = T, alpha=5, exclude.area = T, country_map = land)
-plot(EOO.results[[2]][[2]], col="red")
+plot(EOO.results$spatial.polygon_1, col="red")
 plot(land, add=T)
 
 ## ----include=FALSE-------------------------------------------------------
@@ -68,7 +69,7 @@ MyData <- MyData[which(MyData[,3] %in% c("species_2")),]
 
 ## ----include=TRUE, echo = TRUE, dev.args=list(pointsize=2)---------------
 EOO.results <- EOO.computing(MyData, export_shp = T)
-plot(EOO.results[[1]][[2]], col="red")
+plot(EOO.results$spatial.polygon_1, col="red")
 points(MyData[,2], MyData[,1], pch=19) ### map the occurrences.
 
 ## ----include=FALSE-------------------------------------------------------

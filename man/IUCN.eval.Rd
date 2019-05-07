@@ -10,15 +10,15 @@ Given a dataframe of georeferenced occurrences of one, or more, taxa,
 \usage{
 IUCN.eval(DATA, country_map = NULL, Cell_size_AOO = 2, Cell_size_locations = 10, 
 	Resol_sub_pop = 5, method_locations = "fixed_grid", Rel_cell_size = 0.05, 
-	DrawMap = TRUE, add.legend = TRUE, 
+	DrawMap = FALSE, add.legend = TRUE, 
 	file_name = NULL, export_shp = FALSE, write_shp = FALSE, 
 	write_results=TRUE, protec.areas = NULL, map_pdf = FALSE, draw.poly.EOO=TRUE,
 	exclude.area = FALSE, method_protected_area = "no_more_than_one", 
 	ID_shape_PA = "WDPA_PID", 
 	buff_width = 0.1, SubPop=TRUE, alpha=1, buff.alpha=0.1, 
-	method.range="convex.hull", nbe.rep.rast.AOO=NULL,
+	method.range="convex.hull", nbe.rep.rast.AOO=0,
 	showWarnings=TRUE, write_file_option="excel", 
-	parallel=F, NbeCores=2)
+	parallel=FALSE, NbeCores=2)
 }
 \arguments{
 \item{DATA}{a \code{dataframe} or an object of class \code{spgeoIN} see \url{https://github.com/azizka/speciesgeocodeR}. See Details}
@@ -32,7 +32,7 @@ This shapefile will be used for cropping the \code{SpatialPolygons} used for EOO
 
 \item{Resol_sub_pop}{a numeric, value indicating the radius size in kilometres used for estimating the number of sub-population. By default, equal to 5}
 
-\item{DrawMap}{a logical, if TRUE a map is produced for each species in png format, unless map_pdf is TRUE. By default, it is TRUE}
+\item{DrawMap}{a logical, if TRUE a map is produced for each species in png format, unless map_pdf is TRUE. By default, it is FALSE}
 
 \item{add.legend}{a logical, if TRUE a legend and a submap showing distribution in 'country_map' are displayed for each map. By default, it is TRUE}
 
@@ -118,7 +118,7 @@ Different starting position of the raster used for estimate the AOO may provide 
 
 
 \strong{Estimating number of locations}\cr
-Locations are estimated by overlaying a grid of a given resolution (see \code{Cell_size_locations} for specifying the resolution). The number of locations is simply the number of occupied locations. Note that the grid position is overlaid in order to minimize the number of locations (several translation of the grid are performed and the one providing the minimum number of occupied cells is kept).
+Locations are estimated by overlaying a grid of a given resolution (see \code{Cell_size_locations} for specifying the resolution). The number of locations is simply the number of occupied locations. Note that the grid position is overlaid in order to minimize the number of locations (several translation of the grid are performed and the one providing the minimum number of occupied cells is provided).
 
 \strong{Taking into account protected area for estimating the number of locations}\cr
 A location is defined by the IUCN as a "geographically or ecologically distinct area in which a single threatening event can affect all individuals of the taxon". A simple way to include threat level is to rely on a map of protected areas and assume that populations  within and outside protected areas are under different threat level.\cr
@@ -187,8 +187,8 @@ Gilles Dauby
 Gaston KJ & Fuller AF, 2009, The sizes of species'geographic ranges, Journal of Applied Ecology, 49 1-9
 
 
-IUCN Standards and Petitions Subcommitte, 2010, Guidelines for Using the IUCN Red List Categories and Criteria. Version 8.1
-\url{http://www.iucnredlist.org/technical-documents/red-list-training/red-list-guidance-docs}
+IUCN Standards and Petitions Subcommitte, 2010, Guidelines for Using the IUCN Red List Categories and Criteria.
+\url{https://www.iucnredlist.org/resources/categories-and-criteria}
 
 Rivers CM, Bachman SP & Meagher TR, 2010, Subpopulations, locations and fragmentation: applying IUCN red list criteria to herbarium specimen data, Biodiversity Conservation 19:2071-2085
 }
