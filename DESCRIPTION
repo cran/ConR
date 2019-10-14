@@ -2,7 +2,7 @@ Package: ConR
 Type: Package
 Title: Computation of Parameters Used in Preliminary Assessment of
         Conservation Status
-Version: 1.2.3
+Version: 1.2.4
 Author: Gilles Dauby
 Maintainer: Gilles Dauby <gildauby@gmail.com>
 Description: Multi-species estimation of geographical range parameters
@@ -18,7 +18,8 @@ Suggests: knitr, rmarkdown, alphahull, testthat
 VignetteBuilder: knitr
 URL: https://github.com/gdauby/ConR
 BugReports: https://github.com/gdauby/ConR/issues
+RoxygenNote: 6.1.1
 NeedsCompilation: no
-Packaged: 2019-05-07 14:24:56 UTC; dauby
+Packaged: 2019-10-14 06:28:13 UTC; dauby
 Repository: CRAN
-Date/Publication: 2019-05-07 22:20:39 UTC
+Date/Publication: 2019-10-14 07:00:02 UTC

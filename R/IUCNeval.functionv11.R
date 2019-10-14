@@ -93,19 +93,30 @@
 
 .crop.poly <- function(poly, crop){
 
+  crs_crop <- crs(crop)
+  
+  raster::crs(poly) <- NA
+  raster::crs(crop) <- NA
+  
   p1_owin <- spatstat::as.owin(poly)
   africa_owin <- spatstat::as.owin(crop)
   
-  if(round(area.owin(union.owin(p1_owin,africa_owin)),3)!=round(area.owin(africa_owin),3)) {
+  if(round(spatstat::area.owin(spatstat::union.owin(p1_owin,africa_owin)),3) != round(spatstat::area.owin(africa_owin),3)) {
+    
     w <- spatstat::setminus.owin(p1_owin, africa_owin)
     w2 <- spatstat::setminus.owin(p1_owin, w)
     poly_masked <- as(w2, "SpatialPolygons")
     
-    raster::crs(poly_masked) <- raster::crs(crop)
+    raster::crs(poly_masked) <- crs_crop
+    
   }else{
+    
     poly_masked <- poly
+    
   }
-  EOO <- round(areaPolygon(poly_masked)/1000000,1)  
+  
+  EOO <- round(areaPolygon(poly_masked)/1000000,1)
+  
   return(list(EOO, poly_masked))
 }
 
@@ -172,7 +183,7 @@
       
       makeLine(p1) ### Add vertices to line
       
-      p1 <- gBuffer(p1, width=buff_width) ### Add buffer to line
+      p1 <- suppressWarnings(gBuffer(p1, width=buff_width)) ### Add buffer to line
       
       ## If exclude.area is TRUE
       if(exclude.area) {
@@ -742,8 +753,8 @@ locations.comp <- function(XY,
   }
   
   if(!is.null(protec.areas)) { ### Taking into account Protected Areas if provided
-    DATA_SF <- as.data.frame(XY)
-    colnames(DATA_SF) <- c("ddlon","ddlat")
+    DATA_SF <- as.data.frame(XY[,1:2])
+    colnames(DATA_SF) <- c("ddlat", "ddlon")
     coordinates(DATA_SF) <-  ~ddlon+ddlat
     crs(DATA_SF) <- crs(protec.areas)
     Links_NatParks <- over(DATA_SF, protec.areas)
@@ -759,7 +770,9 @@ locations.comp <- function(XY,
         ## if method is 'no_more_than_one' the number of location is the number of occupied protected areas
         
         loc_pa <- 
-          by(coordEAC_pa[,c("tax", "id_pa")], coordEAC_pa[,"tax"], FUN = function(x) length(unique(x$id_pa)))
+          by(coordEAC_pa[,c("tax", "id_pa")], coordEAC_pa[,"tax"], 
+             FUN = function(x) length(unique(x$id_pa)))
+        names(loc_pa) <- gsub(pattern = " ", replacement = "_", names(loc_pa))
         LocNatParks[names(LocNatParks) %in% names(loc_pa)] <-
           loc_pa
         r2_PA <- NA
@@ -776,7 +789,7 @@ locations.comp <- function(XY,
         if(any(method=="fixed_grid"))
           Resolution <- Cell_size_locations
         if(any(method=="sliding scale")){
-          if(nrow(coordEAC_pa)>1) {Resolution <- max(pairwise_dist_pa)*Rel_cell_size
+          if(nrow(coordEAC_pa)>1) {Resolution <- max(pairwise_dist_pa)/1000*Rel_cell_size
           }else{
             Resolution <- 10
           }
@@ -972,7 +985,7 @@ locations.comp <- function(XY,
   }
   
   if(!is.null(protec.areas)) {
-    DATA_SF <- as.data.frame(XY)
+    DATA_SF <- as.data.frame(unique(XY))
     colnames(DATA_SF) <- c("ddlon","ddlat")
     coordinates(DATA_SF) <-  ~ddlon+ddlat
     crs(DATA_SF) <- crs(protec.areas)
@@ -1430,7 +1443,7 @@ IUCN.eval <- function (DATA,
     }
   
   if(!is.null(protec.areas)) {
-    if(!identicalCRS(protec.areas, land)) crs(protec.areas) <-crs(land)
+      if(!identicalCRS(protec.areas, country_map)) crs(protec.areas) <- crs(country_map)
   }
   
   if(length(grep("[?]", DATA[,3]))>0) DATA[,3] <- gsub("[?]", "_", DATA[,3])
